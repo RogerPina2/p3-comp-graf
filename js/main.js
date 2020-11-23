@@ -27,7 +27,7 @@ const geometry1 = new THREE.BoxGeometry( .3, 1, .1);
 const geometry2 = new THREE.SphereGeometry( .1);
 const geometry3 = new THREE.BoxGeometry( 10.4, .2, .1);
 const geometry4 = new THREE.BoxGeometry( .2, 7, .1);
-const geometry5 = new THREE.BoxGeometry( .01, 7, .1);
+const geometry5 = new THREE.BoxGeometry( .02, 7, .1);
 const material = new THREE.MeshBasicMaterial( { color: 0xAA00AA } );
 const material1 = new THREE.MeshBasicMaterial( { color: 0x0000AA } );
 const material2 = new THREE.MeshBasicMaterial( { color: 0xAAAAAA } );
@@ -89,13 +89,15 @@ wall_left.position.x = -5.1;
 wall_right.position.x = 5.1;
 line.position.y = 0;
 ball.reciveShadow = true;
+camera.position.z = 7;
 
 
 //variables
-var velBall = .03;
+var velBall = .08;
 var velBally = .02;
 var lastTs = 0;
 var counter = 0;
+var batida = 0;
 
 scene.add( player1 );
 scene.add( player2 );
@@ -111,9 +113,8 @@ scene.add(light1);
 const animate = function (ts) {
     requestAnimationFrame( animate );
 
-
+    batida += 1;
     counter += 1;
-    camera.position.z = 5;
     renderer.render( scene, camera );
     
     if (counter > 100){
@@ -123,19 +124,24 @@ const animate = function (ts) {
 
       var timeDelta = (ts - lastTs)/1000;
       lastTs = ts;
+      //console.log(counter);
 
       ball.position.x += velBall;
       ball.position.y += velBally;
 
       var movSpeed = 5*timeDelta;
 
-      if(counter > 5000){
+      if(counter > 400){
         camera.rotation.z += 0.003;
       }
 
       if(ball.position.x - .1 <= -5){
         velBall = -velBall;
         placar_1 += 1;
+        if(placar_1 == 7){
+          placar_1 = 0;
+          placar_2 = 0;
+        }
         scene.remove(mesh);
         loader.load('https://cdn.rawgit.com/mrdoob/three.js/master/examples/fonts/helvetiker_regular.typeface.json', function(font) {
   
@@ -165,12 +171,17 @@ const animate = function (ts) {
         player2.position.y = 0;
         ball.position.x = 0;
         ball.position.y = 0;
+        camera.rotation.z = 0;
         counter = 0;
       }
 
       if(ball.position.x + .1  >= 5){
         velBall = -velBall;
         placar_2 += 1;
+        if(placar_2 == 7){
+          placar_1 = 0;
+          placar_2 = 0;
+        }
         scene.remove(mesh);
         loader.load('https://cdn.rawgit.com/mrdoob/three.js/master/examples/fonts/helvetiker_regular.typeface.json', function(font) {
   
@@ -200,6 +211,7 @@ const animate = function (ts) {
         player2.position.y = 0;
         ball.position.x = 0;
         ball.position.y = 0;
+        camera.rotation.z = 0;
         counter = 0;
       }
 
@@ -208,11 +220,17 @@ const animate = function (ts) {
       }
 
       if(player1.position.x+.15 >= ball.position.x-.1 && player1.position.x -.15 <= ball.position.x+.1 && player1.position.y+.5 >= ball.position.y && player1.position.y-.5 <= ball.position.y){
-        velBall = -velBall;
+        if(batida > 15){
+          velBall = -velBall;
+          batida = 0;
+        }
       }
 
       if(player2.position.x+.15 >= ball.position.x-.1 && player2.position.x -.15 <= ball.position.x+.1 && player2.position.y+.5 >= ball.position.y && player2.position.y-.5 <= ball.position.y){
-        velBall = -velBall;
+        if(batida > 15){
+          velBall = -velBall;
+          batida = 0;
+        }
       }
 
       if(input.isLeftPressed) {
