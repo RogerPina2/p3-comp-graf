@@ -93,11 +93,12 @@ camera.position.z = 7;
 
 
 //variables
-var velBall = .08;
-var velBally = .02;
+var velBall = .06;
+var velBally = .03;
 var lastTs = 0;
 var counter = 0;
 var batida = 0;
+var sete = 0;
 
 scene.add( player1 );
 scene.add( player2 );
@@ -112,12 +113,24 @@ scene.add(light1);
 
 const animate = function (ts) {
     requestAnimationFrame( animate );
+    renderer.render( scene, camera );
 
     batida += 1;
     counter += 1;
-    renderer.render( scene, camera );
     
     if (counter > 100){
+      if(counter == 102){
+        player1.position.x = -4;
+        player1.position.y = 0;
+        player2.position.x = 4;
+        player2.position.y = 0;
+        if(placar_2 > 0 || sete == 1){
+          scene.remove(mesh_g);
+        }
+        if(placar_1 > 0 || sete == 1){
+          scene.remove(mesh_g1);
+        }
+      }
     
       // camera.rotation.x = 0.3;
       // camera.position.y = -2;
@@ -135,17 +148,32 @@ const animate = function (ts) {
         camera.rotation.z += 0.003;
       }
 
+      //gol
       if(ball.position.x - .1 <= -5){
+        sete = 0;
         velBall = -velBall;
-        placar_1 += 1;
-        if(placar_1 == 7){
+        velBally = .03;
+        placar_2 += 1;
+        if(placar_2 == 7){
           placar_1 = 0;
           placar_2 = 0;
+          sete = 1;
         }
         scene.remove(mesh);
         loader.load('https://cdn.rawgit.com/mrdoob/three.js/master/examples/fonts/helvetiker_regular.typeface.json', function(font) {
   
           var text = new THREE.TextGeometry(`${placar_1} x ${placar_2}`, {
+            font: font,
+            size: 50,
+            height: 0,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 5,
+            bevelSize: 8,
+            bevelSegments: 5
+          });
+
+          var goal = new THREE.TextGeometry("goal", {
             font: font,
             size: 50,
             height: 0,
@@ -164,6 +192,16 @@ const animate = function (ts) {
           mesh.scale.multiplyScalar(0.01)
           mesh.castShadow = true;
           scene.add(mesh);
+
+          var material_g = new THREE.MeshLambertMaterial({
+            color: 0x0000AA
+          });
+          mesh_g = new THREE.Mesh(goal, material_g);
+          mesh_g.position.set(-.7, 0, 1);
+          mesh_g.scale.multiplyScalar(0.01)
+          mesh_g.castShadow = true;
+          scene.add(mesh_g);
+
         });
         player1.position.x = -4;
         player1.position.y = 0;
@@ -175,17 +213,32 @@ const animate = function (ts) {
         counter = 0;
       }
 
+      //gol
       if(ball.position.x + .1  >= 5){
+        sete = 0;
         velBall = -velBall;
-        placar_2 += 1;
-        if(placar_2 == 7){
+        velBally = .03;
+        placar_1 += 1;
+        if(placar_1 == 7){
           placar_1 = 0;
           placar_2 = 0;
+          sete = 1;
         }
         scene.remove(mesh);
         loader.load('https://cdn.rawgit.com/mrdoob/three.js/master/examples/fonts/helvetiker_regular.typeface.json', function(font) {
   
           var text = new THREE.TextGeometry(`${placar_1} x ${placar_2}`, {
+            font: font,
+            size: 50,
+            height: 0,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 5,
+            bevelSize: 8,
+            bevelSegments: 5
+          });
+
+          var goal = new THREE.TextGeometry("goal", {
             font: font,
             size: 50,
             height: 0,
@@ -204,6 +257,16 @@ const animate = function (ts) {
           mesh.scale.multiplyScalar(0.01)
           mesh.castShadow = true;
           scene.add(mesh);
+
+          var material_g1 = new THREE.MeshLambertMaterial({
+            color: 0xAA00AA
+          });
+
+          mesh_g1 = new THREE.Mesh(goal, material_g1);
+          mesh_g1.position.set(-.7, 0, 1);
+          mesh_g1.scale.multiplyScalar(0.01)
+          mesh_g1.castShadow = true;
+          scene.add(mesh_g1);
         });
         player1.position.x = -4;
         player1.position.y = 0;
@@ -220,14 +283,28 @@ const animate = function (ts) {
       }
 
       if(player1.position.x+.15 >= ball.position.x-.1 && player1.position.x -.15 <= ball.position.x+.1 && player1.position.y+.5 >= ball.position.y && player1.position.y-.5 <= ball.position.y){
-        if(batida > 15){
-          velBall = -velBall;
-          batida = 0;
+        if(batida > 30){
+          if(ball.position.y > player1.position.y){
+            velBally += .02
+            velBall = -velBall;
+            batida = 0;
+          }
+          if(ball.position.y < player1.position.y){
+            velBally -= .02
+            velBall = -velBall;
+            batida = 0;
+          }
         }
       }
 
       if(player2.position.x+.15 >= ball.position.x-.1 && player2.position.x -.15 <= ball.position.x+.1 && player2.position.y+.5 >= ball.position.y && player2.position.y-.5 <= ball.position.y){
-        if(batida > 15){
+        if(ball.position.y > player2.position.y){
+          velBally += .02
+          velBall = -velBall;
+          batida = 0;
+        }
+        if(ball.position.y < player2.position.y){
+          velBally -= .02
           velBall = -velBall;
           batida = 0;
         }
@@ -268,40 +345,62 @@ const animate = function (ts) {
         }
       }
 
-      if(input.isLeftPressed1) {
-        if(player2.position.x - .15 < 0){
-          player2.position.x += 0;
-        }
-        else{
-          player2.position.x -= movSpeed;
-        }
-      }
-      
-      if(input.isRightPressed1) {
-        if(player2.position.x + .15  > 5){
-          player2.position.x += 0;
-        }
-        else{
-          player2.position.x += movSpeed;
-        }
-        
-      }
-      if(input.isDownPressed1) {
+      //Bot
+      if(player2.position.y > ball.position.y){
         if(player2.position.y - .5 < -3.5){
           player2.position.y += 0;
         }
         else{
           player2.position.y -= movSpeed;
         }
+        
       }
-      if(input.isUpPressed1) {
+
+      if(player2.position.y < ball.position.y){
         if(player2.position.y + .5 > 3.5){
           player2.position.y += 0;
         }
         else{
           player2.position.y += movSpeed;
         }
+        
       }
+      
+
+      // if(input.isLeftPressed1) {
+      //   if(player2.position.x - .15 < 0){
+      //     player2.position.x += 0;
+      //   }
+      //   else{
+      //     player2.position.x -= movSpeed;
+      //   }
+      // }
+      
+      // if(input.isRightPressed1) {
+      //   if(player2.position.x + .15  > 5){
+      //     player2.position.x += 0;
+      //   }
+      //   else{
+      //     player2.position.x += movSpeed;
+      //   }
+        
+      // }
+      // if(input.isDownPressed1) {
+      //   if(player2.position.y - .5 < -3.5){
+      //     player2.position.y += 0;
+      //   }
+      //   else{
+      //     player2.position.y -= movSpeed;
+      //   }
+      // }
+      // if(input.isUpPressed1) {
+      //   if(player2.position.y + .5 > 3.5){
+      //     player2.position.y += 0;
+      //   }
+      //   else{
+      //     player2.position.y += movSpeed;
+      //   }
+      // }
     }
 };
 
