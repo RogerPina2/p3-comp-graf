@@ -280,6 +280,7 @@ const animate = function (ts) {
 
       if(ball.position.y - .1 <= -3.5 || ball.position.y + .1  >= 3.5){
         velBally = -velBally;
+        batida = 0;
       }
 
       if(player1.position.x+.15 >= ball.position.x-.1 && player1.position.x -.15 <= ball.position.x+.1 && player1.position.y+.5 >= ball.position.y && player1.position.y-.5 <= ball.position.y){
